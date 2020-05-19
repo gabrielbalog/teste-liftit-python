@@ -109,6 +109,26 @@ o veículo criado aparece. Isso se deve pelo superusuário não entrar nesta
 regra. Com o perfil atrelado a ele você pode ver todos os dados e fazer o que
 quiser.
 
+## API
+
+O projeto conta com uma API para gerenciar os dados de veículos. Para acessa-la
+é necessário ter um token. O mesmo pode ser obtido no portal do Django, criando
+um em "Tokens".
+
+Com o Token em mãos na chamada coloque-o no Header desta forma "Authorization: Token 3727d7272f7727642624".
+
+Ou caso deseje receber o token diretamente pela API, utilize o endpoint 
+``/api-token-auth/``, passando um JSON com username e password no body.
+
+A documentação está disponível no link http://localhost:8000/redoc ou 
+http://localhost:8000/swagger.
+
+A API provem os seguintes endpoints:
+- /fleet/vehicle (GET, POST)
+- /fleet/vehicle/:id (GET, PUT, DELETE)
+
+A API possui cobertura de testes.
+
 ## Desenvolvimento
 
 Para desenvolver e utilizar as melhores funções disponíveis os passos
