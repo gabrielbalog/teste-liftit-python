@@ -1,10 +1,11 @@
 # Teste Liftit
 
-Teste tem como objetivo a criação de um sistema para gerenciamento de veículos
-e proprietários, bem como autenticação dos mesmos.
+O teste tem como objetivo a criação de um sistema para gerenciamento de veículos
+e proprietários.
 
-Ainda deve contar com um portal para gerenciamento dos dados. Neste portal
-o usuário somente deverá ver apenas seus veículos.
+Deve contar com um portal para gerenciamento dos dados. Neste portal
+o usuário somente deverá ver apenas seus veículos. Deverá haver autenticação
+no portal.
 
 O código deve ser feito em Python, e deve contar com testes.
 
@@ -15,22 +16,17 @@ O código deve ser feito em Python, e deve contar com testes.
 - PostgreSQL 12
 - Docker
 
-Para o Python o projeto utiliza da última versão disponível, neste momento
-3.8.2. O mesmo para o Django que está na versão 3.0.6.
-
-O Postgres utilizado é o build mais atual da versão 12 alpine.
-
 ## Utilização
 
 Para utilização do projeto basta clona-lo em sua máquina utilizando o git.
-Deve possuir também o binário do docker-compose em sua máquina.
+Deve-se possuir também o binário do docker-compose em sua máquina.
 
 Alguns passos devem ser feitos antes de iniciar:
 - Criação do arquivo de ambiente do Django e do Postgres
 
 ### Criando os arquivos de ambiente
 
-Copie o arquivo .env.sample ou renome-o para .env
+Copie o arquivo .env.sample para .env
 
 Faça o mesmo para o arquivo .env.db.sample, deixando como .env.db
 
@@ -44,8 +40,8 @@ encontrar dentro deles são:
 No arquivo do Postgres, você irá encontrar:
 - Nome, usuário e senha do banco de dados
 
-Importante notar que os dados no arquivo do Django deve estar em conformidade
-com dados do arquivo do banco de dados para que possa funcionar corretamente.
+*Importante notar que os dados no arquivo do Django deve estar em conformidade
+com dados do arquivo do banco de dados para que possa funcionar corretamente.*
 
 Por padrão o debug vem desativado.
 
@@ -58,10 +54,11 @@ $ docker-compose up --build -d
 ```
 
 Neste momento ele fará o build da imagem do Django, estando terminada ele
-iniciára o processo do Postgres e do Django.
+iniciara o processo do Postgres e do Django.
 
-Basta acessar o endereço http://localhost:8000 para visualizar a tela de boas
-vindas do Django. Para acessar o portal basta utilizar o endereço
+Agora basta acessar o endereço http://localhost:8000 para visualizar a tela de boas
+vindas do Django, somente caso o DEBUG esteja ativado, do contrário por não haver
+rota ele retornara um erro. Para acessar o portal basta utilizar o endereço
 http://localhost:8000/admin.
 
 Neste ponto você não possui um usuário criado, para criar execute os seguintes
@@ -80,31 +77,38 @@ Password (again):
 Digite um nome para o usuário, um email, uma senha e pronto o usuário estará
 criado. Volte ao login do portal e tente usar as credenciais.
 
-### Usuários
+### Static e Media
+
+É importante notar que o não uso de Debug impacta na exibição das medias
+e arquivos estáticos. Para resolver isso é necessário um proxy reverso,
+que irá redirecionar todas as chamadas para o endpoint direto para a pasta 
+dos carquivos.
+
+## Usuários
 
 O usuário que foi criado possui o status de superusuário. Isso signifca que
 ele pode acessar todos os dados mesmo que não esteja em um grupo adequado.
 
 Para utilização como um usuário normal, entre em "Users", e "Add User".
-Preencha um nome de usuário e senha, criado o usuário é necessário atribuir
-o grupo FleetUser a ele, para isso clique duas vezes no nome do grupo.
+Preencha um nome para o usuário e uma senha. Criado o usuário é necessário atribuir
+o grupo "FleetUser" a ele, para isso clique duas vezes no nome do grupo.
 
 Tique também que o usuário seja do "Staff", sem isso ele não poderá logar
 no portal.
 
 No rodapé salve o usuário.
 
-Acesse em uma janela anonima, ou faça logout, com o novo usuário. Veja que
-"Groups" e "Users" não aparece mais, somente "Fleet".
+Acesse em uma janela anonima, ou faça logout, e logue com o novo usuário. Veja que
+"Groups" e "Users" não aparecem mais, somente "Fleet" é exibido.
 
-#### Limitação de acesso aos veículos
+### Limitação de acesso aos veículos
 
 Foi criado uma limitação para o acesso somente dos veículos que o usuário
 criou. Para testar isso, logue como superuserário ou com outro usuário e
 crie um veículo, acesse agora com um usuário normal. O veículo que foi criado
 não aparece.
 
-Agora crie um veículo com este usuário, e acesse pelo superusuário, veja que
+Agora crie um veículo com este usuário normal, e acesse pelo superusuário, veja que
 o veículo criado aparece. Isso se deve pelo superusuário não entrar nesta
 regra. Com o perfil atrelado a ele você pode ver todos os dados e fazer o que
 quiser.
@@ -113,17 +117,15 @@ quiser.
 
 O projeto conta com uma API para gerenciar os dados de veículos. Para acessa-la
 é necessário ter um token. O mesmo pode ser obtido no portal do Django, criando
-um em "Tokens".
+um em "Tokens", ou pela pela API, utilize o endpoint 
+``/api-token-auth/``, passando um JSON com username e password no body. 
 
 Com o Token em mãos na chamada coloque-o no Header desta forma "Authorization: Token 3727d7272f7727642624".
-
-Ou caso deseje receber o token diretamente pela API, utilize o endpoint 
-``/api-token-auth/``, passando um JSON com username e password no body.
 
 A documentação está disponível no link http://localhost:8000/redoc ou 
 http://localhost:8000/swagger.
 
-A API provem os seguintes endpoints:
+A API prove os seguintes endpoints:
 - /fleet/vehicle (GET, POST)
 - /fleet/vehicle/:id (GET, PUT, DELETE)
 
@@ -139,6 +141,32 @@ são os seguintes:
 Estes dois passos posibilitará que todas as alterações no host sejam feitas
 dentro do docker, e que a funcionalidade de reload do Django funcione
 corretamente.
+
+### Ambiente Virtual
+
+Ainda sim é possível não usar o docker para rodar o projeto. Para isso
+crie um virtual envinroment com o python:
+
+```
+$ python -m venv venv
+```
+
+Importante que você deve possuir a versão 3.8 instalada em seu sistema.
+Caso não possua, recomendo o uso da ferramente pyenv para sua instalação.
+
+Com o ambiente criado, basta entra nele e instalar o requirements:
+
+```
+$ source venv/bin/activate
+$ (venv) pip install -r requirements.txt
+```
+
+Outra coisa é necessário notar são os dados de ambiente necessários para
+rodar o Django. Exporte-os manualmente para seu ambiente com os dados
+adequados.
+
+
+
 
 ## Testes
 
@@ -160,12 +188,3 @@ Destroying test database for alias 'default'...
 
 O resultado dos testes será disponibilizado abaixo do comando.
 
-## Static e Media
-
-Importante notar que o usuário de Debug false, impacta na exibição das medias
-e arquivos estáticos. Para resolver isso é necessário um proxy reverso,
-que redireciona todas as chamadas para o endpoint direto para a pasta dos
-arquivos.
-
-Para isso o nginx deve ser instalado no servidor, ou utilizado um docker,
-e o volume utilizado pelo docker Django deverá ser utilizado no mesmo docker.
